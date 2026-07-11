@@ -36,7 +36,7 @@ here -- **nothing below works until it does.**
 
 | | |
 |---|---|
-| DV profiles 5 + 8 | Direct-play with the RPU dynamic trims applied (player-led; the output is an HDR10 signal carrying the DV-processed picture -- TV-led DV is not possible on any Windows PC) |
+| DV profiles 5 + 8 | Direct-play with the RPU dynamic trims applied (LLDV-style source-side processing; the output is an HDR10 signal carrying the DV-processed picture, no DV VSIF. TV-led DV from Windows exists only on TVs with a DV PC mode, e.g. recent LG, via a dedicated DV player app + 8-bit RGB Full output -- not this setup's path) |
 | Profile 7 (FEL) | Base layer + RPU at best; the FEL enhancement layer never decodes |
 | Audio | AAC / AC3 / EAC3 / FLAC / 2ch-Opus direct-play; DTS / TrueHD / >2ch-Opus auto-transcode (video stays copied) |
 | Display switching | Optional gate service flips desktop HDR + matches refresh rate BEFORE the first frame |
@@ -148,7 +148,7 @@ and the video stays copied either way.
 
 ## Known limits (the dealbreakers)
 
-- No FEL decode; no TV-led DV -- Windows platform limits.
+- No FEL decode in this setup (mpv/libplacebo can now decode P7 FEL with its own L1-based tone mapping -- a separate, non-Jellyfin-web route); no TV-led DV here.
 - No DTS/TrueHD bitstreaming; those tracks transcode.
 - The launcher kills ALL Edge processes (a dedicated HTPC is assumed).
 - No 4K50/60 HDR on HDMI 2.0 GPUs in this path.
