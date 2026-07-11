@@ -184,7 +184,7 @@ Write-Host @"
   - Edge settings: disable 'Startup boost' and background extensions/apps.
   - jellyfin-web settings (on the SAME URL you will use!): see the README Jellyfin-settings
     table (fMP4-HLS on, DTS/TrueHD off, PGS rendering on; server: throttle/delete-segments off).
-  - Set the desktop to 10-bit RGB Full range (GPU control panel).
+  - Set the GPU output to RGB / 10-bit / Full range -- in the Intel/NVIDIA/AMD panel, NOT Windows Settings.
   - ALWAYS start Edge via required/jellyfin-edge-dv.cmd -- an Edge you start manually
     has NO DV flags and DV will silently not engage.
   - If you use the gate, confirm http://127.0.0.1:17999/health answers.

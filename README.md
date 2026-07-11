@@ -4,6 +4,10 @@ Dolby Vision playback for a Jellyfin HTPC on **Windows 11** -- no dedicated DV p
 **Microsoft Edge + stock jellyfin-web + the Windows Dolby Vision extension**, so the whole
 Jellyfin front-end (library, watched states, Next Up, remote control) keeps working.
 
+Notable: all DV processing happens ON THE PC and the output is ordinary HDR10 -- the
+display itself does NOT need Dolby Vision support. To be precise: any HDR10-capable
+display works, as long as the EDID override below convinces Windows it is DV-certified.
+
 > Unofficial community project -- not affiliated with Jellyfin, Dolby, or Microsoft.
 > Nothing in Jellyfin is patched: this is a launcher + userscript around the stock web client.
 
@@ -44,7 +48,7 @@ here -- **nothing below works until it does.**
 
 ## Requirements
 
-- Windows 11 (tested 25H2 / 26200), a DV-capable TV, and the certification line above.
+- Windows 11 (tested 25H2 / 26200), an HDR10-capable display (real DV support NOT required -- see above), and the certification line.
 - Microsoft Edge + ViolentMonkey (MV2 extension -- the setup script pins the Edge MV2 policy;
   Tampermonkey MV3 is the fallback if Edge ever drops MV2).
 - **Dolby Vision Extensions** (free) + **[HEVC Video Extensions](https://apps.microsoft.com/detail/9nmzlz57r3t7)**
@@ -64,10 +68,13 @@ here -- **nothing below works until it does.**
    executable path if yours is not the default install).
 4. Edge (`edge://settings/system`): disable **Startup boost** and **background apps** --
    a leftover Edge process silently eats the DV flags.
-5. GPU control panel: output = **RGB, 10-bit, FULL range**; TV input on Enhanced/full black
-   level. YCbCr or limited range = crushed/washed blacks in this windowed path -- the
-   OPPOSITE of the classic fullscreen-HTPC advice. (On HDMI 2.0 this caps 4K at 30 Hz;
-   film rates are fine.)
+5. Set the GPU output to **RGB, 10-bit, FULL range**. This is NOT in Windows Settings --
+   only the GPU vendor panel has it: Intel Graphics Command Center ("Color Format /
+   Color Depth / Full Range"), NVIDIA Control Panel ("Change resolution > Output color
+   format/depth/range"), or AMD Software ("Display > Pixel Format / Color Depth").
+   Match the TV input to Enhanced/full black level. YCbCr or limited range =
+   crushed/washed blacks in this windowed path -- the OPPOSITE of the classic
+   fullscreen-HTPC advice. (On HDMI 2.0 this caps 4K at 30 Hz; film rates are fine.)
 6. Apply the **Jellyfin settings** below -- on the FINAL URL. jellyfin-web stores settings
    per origin: `192.168.1.x:8096` and `htpc:8096` are two different players. Pick one URL
    and use it in the launcher, the userscript, and your settings.
