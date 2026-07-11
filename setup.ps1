@@ -152,6 +152,24 @@ if ($isAdmin) {
   $manualAdmin += "netsh http add urlacl url=http://127.0.0.1:17999/ user=`"$env:USERDOMAIN\$env:USERNAME`""
 }
 
+# ---- STEP 6: desktop shortcut for the Edge launcher -----------------------------------
+Write-Host ""
+Write-Host "STEP 6: desktop shortcut" -ForegroundColor Yellow
+Write-Host "  Edge must ALWAYS be started via required\jellyfin-edge-dv.cmd (a manually started"
+Write-Host "  Edge has no DV flags); a desktop shortcut makes that the natural way."
+if (Ask "  Create a 'Jellyfin DV' desktop shortcut?") {
+  try {
+    $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Jellyfin DV.lnk'
+    $sc = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
+    $sc.TargetPath = Join-Path $PSScriptRoot 'required\jellyfin-edge-dv.cmd'
+    $sc.WorkingDirectory = Join-Path $PSScriptRoot 'required'
+    $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+    if (Test-Path $edge) { $sc.IconLocation = "$edge,0" }
+    $sc.Save()
+    Write-Host "  -> $lnk" -ForegroundColor Green
+  } catch { Write-Host "  Could not create shortcut: $_" -ForegroundColor Yellow }
+}
+
 # ---- remaining manual steps ----------------------------------------------------------
 if ($manualAdmin.Count) {
   Write-Host ""
@@ -167,6 +185,7 @@ Write-Host @"
   - jellyfin-web settings (on the SAME URL you will use!): see the README Jellyfin-settings
     table (fMP4-HLS on, DTS/TrueHD off, PGS rendering on; server: throttle/delete-segments off).
   - Set the desktop to 10-bit RGB Full range (GPU control panel).
-  - Launch sessions via required/jellyfin-edge-dv.cmd; if you use the gate, confirm
-    http://127.0.0.1:17999/health answers.
+  - ALWAYS start Edge via required/jellyfin-edge-dv.cmd -- an Edge you start manually
+    has NO DV flags and DV will silently not engage.
+  - If you use the gate, confirm http://127.0.0.1:17999/health answers.
 "@

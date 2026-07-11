@@ -10,7 +10,7 @@ REM to this script (repo layout); without the gate DV still works -- you manage 
 REM Gate options (e.g. -RefreshOnly, -DefaultHdr, -DisplayId 2) go into GATE_ARGS.
 set "GATE=%~dp0..\optional\jf-hdr-gate.ps1"
 set "GATE_ARGS="
-if exist "%GATE%" curl -s -m 2 http://127.0.0.1:17999/health >nul 2>&1 || start "" pwsh -ExecutionPolicy Bypass -File "%GATE%" %GATE_ARGS%
+if exist "%GATE%" curl -s -m 2 http://127.0.0.1:17999/health >nul 2>&1 || start "" /min pwsh -ExecutionPolicy Bypass -File "%GATE%" %GATE_ARGS%
 REM Launch Edge with the Dolby Vision feature flags, fullscreen at the Jellyfin web UI.
 REM Edge must be closed first or the flags are ignored, so close any running instance
 REM and wait until every msedge.exe is gone (a straggler swallows the flags).

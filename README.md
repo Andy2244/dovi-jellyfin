@@ -69,7 +69,9 @@ here -- **nothing below works until it does.**
 6. Apply the **Jellyfin settings** below -- on the FINAL URL. jellyfin-web stores settings
    per origin: `192.168.1.x:8096` and `htpc:8096` are two different players. Pick one URL
    and use it in the launcher, the userscript, and your settings.
-7. Start sessions via `required/jellyfin-edge-dv.cmd`.
+7. **Always start Edge via `required/jellyfin-edge-dv.cmd`** -- an Edge you start
+   manually (taskbar/Start menu) has no DV flags and DV silently won't engage. The setup
+   offers a "Jellyfin DV" desktop shortcut for it.
 
 <details><summary>Optional: automatic HDR + refresh switching (gate service)</summary>
 
