@@ -7,7 +7,7 @@ Jellyfin front-end (library, watched states, Next Up, remote control) keeps work
 > Unofficial community project -- not affiliated with Jellyfin, Dolby, or Microsoft.
 > Nothing in Jellyfin is patched: this is a launcher + userscript around the stock web client.
 
-Clone or unzip the repo and start from `setup.ps1`. Tested stack: **Windows 11 25H2
+Clone or unzip the repo and run **`setup.cmd`** (double-click works). Tested stack: **Windows 11 25H2
 (build 26200) + Edge + Jellyfin 10.11.x** -- other builds likely work but are untested.
 
 ## Check this BEFORE buying the HEVC extension
@@ -53,7 +53,7 @@ calculator for the rest. Reboot, re-check the settings page, then continue here.
 
 ## Setup
 
-1. Run `setup.ps1` (interactive, buys nothing, checks the DV line first).
+1. Run `setup.cmd` (interactive, buys nothing, checks the DV line first).
 2. ViolentMonkey: toolbar icon -> **Open dashboard**, drag `required/jellyfin-dv.user.js`
    onto it -> **Confirm installation**. Verify: reload the Jellyfin tab (**F5**) -> the VM
    icon shows a **"1" badge**. No badge -> edit the script's `@match` lines to your URL.
@@ -155,7 +155,7 @@ and the video stays copied either way.
 
 | Path | What |
 |---|---|
-| `setup.ps1` | Guided prerequisite installer (DV check first, buys nothing) |
+| `setup.cmd` / `setup.ps1` | Guided prerequisite installer (DV check first, buys nothing) |
 | `required/jellyfin-dv.user.js` | The DV userscript (direct-play + display preflight) |
 | `required/jellyfin-edge-dv.cmd` | Flag-Edge launcher (auto-starts the gate if present) |
 | `optional/jf-hdr-gate.ps1` | HDR + refresh gate service (127.0.0.1:17999) |
