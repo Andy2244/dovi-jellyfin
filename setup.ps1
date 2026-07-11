@@ -21,11 +21,22 @@ function Ask([string]$q) {
   }
 }
 function StoreInstall([string]$id, [string]$name) {
-  Write-Host "  installing $name ..."
+  Write-Host -NoNewline "  $name ... "
   $global:LASTEXITCODE = 0
-  $ok = $false
-  try { winget install --id $id --source msstore --accept-source-agreements --accept-package-agreements; $ok = ($LASTEXITCODE -eq 0) } catch {}
-  if (-not $ok) { Write-Host "  -> failed/skipped ($name). Store page: ms-windows-store://pdp/?ProductId=$id" -ForegroundColor Yellow }
+  $out = ''
+  $launched = $true
+  # capture winget's chatty output (agreements blocks, progress bars); show it only on failure
+  try { $out = winget install --id $id --source msstore --accept-source-agreements --accept-package-agreements --disable-interactivity 2>&1 | Out-String } catch { $launched = $false }
+  # -1978335189 = 0x8A15002B "no applicable upgrade" -- locale-independent already-installed signal
+  $already = ($LASTEXITCODE -eq -1978335189) -or ($out -match 'already installed|No applicable upgrade|No available upgrade|No newer package')
+  if ($launched -and $LASTEXITCODE -eq 0) { Write-Host "OK" -ForegroundColor Green }
+  elseif ($launched -and $already) { Write-Host "already installed" -ForegroundColor Green }
+  else {
+    Write-Host "FAILED" -ForegroundColor Yellow
+    $tail = ($out -split "`r?`n" | Where-Object { $_.Trim() } | Select-Object -Last 1)
+    Write-Host "    $tail"
+    Write-Host "    Store page: ms-windows-store://pdp/?ProductId=$id"
+  }
 }
 # resolve pwsh even when a just-finished winget install isn't on this process's PATH yet
 function Find-Pwsh {
@@ -39,6 +50,8 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
   Write-Host "winget not found -- install 'App Installer' from the Microsoft Store first, then re-run." -ForegroundColor Yellow
   exit 1
 }
+
+$manualAdmin = @()
 
 Write-Host ""
 Write-Host "=== dovi-jellyfin setup ===" -ForegroundColor Cyan
@@ -80,16 +93,9 @@ if (Ask "  Install the free media extensions (Dolby Vision, Dolby Access, AV1, V
 # ---- STEP 2: HEVC --------------------------------------------------------------------
 Write-Host ""
 Write-Host "STEP 2: HEVC Video Extensions (required for DV decode)" -ForegroundColor Yellow
-Write-Host "  Trying the free 'from Device Manufacturer' package first (delisted from Store"
-Write-Host "  browsing, but the package itself may still install) -- good for TESTING the"
-Write-Host "  whole DV chain before spending money."
-if (Ask "  Try the free HEVC package?") {
-  StoreInstall 9N4WGH0Z6VHQ 'HEVC Video Extensions from Device Manufacturer (free)'
-}
-Write-Host "  HINT: once everything works, switch to the PAID package (~1 USD/EUR) for your"
-Write-Host "  final setup -- the free one is delisted and frozen, and it is unclear whether"
-Write-Host "  both ship the same binaries; the paid one is the maintained/official codec."
-if (Ask "  Open the PAID HEVC Store page?") { Start-Process 'ms-windows-store://pdp/?ProductId=9NMZLZ57R3T7' }
+Write-Host "  This one is PAID (~1 USD/EUR); the old free OEM package is gone from the Store."
+Write-Host "  Step 0 passed, so the required DV certification is present."
+if (Ask "  Open the HEVC Store page?") { Start-Process 'ms-windows-store://pdp/?ProductId=9NMZLZ57R3T7' }
 
 # ---- STEP 3: PowerShell 7 + DisplayConfig (only needed for the optional HDR gate) -----
 Write-Host ""
@@ -97,6 +103,7 @@ Write-Host "STEP 3: PowerShell 7 + DisplayConfig module (for optional/jf-hdr-gat
 if (Find-Pwsh) {
   Write-Host "  pwsh found -> OK"
 } elseif (Ask "  pwsh not found. Install via winget now?") {
+  # big download -> keep winget's live progress bar (capturing it would look hung)
   winget install --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
 }
 $pwsh = Find-Pwsh
@@ -127,7 +134,8 @@ if ($isAdmin) {
   }
 } else {
   Write-Host "  Not elevated -> run this later in an ADMIN shell:" -ForegroundColor Yellow
-  Write-Host '    reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v ExtensionManifestV2Availability /t REG_DWORD /d 2 /f'
+  Write-Host '    reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v ExtensionManifestV2Availability /t REG_DWORD /d 2 /f' -ForegroundColor Cyan
+  $manualAdmin += 'reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v ExtensionManifestV2Availability /t REG_DWORD /d 2 /f'
 }
 
 # ---- STEP 5: URL reservation for the gate (optional) ----------------------------------
@@ -140,10 +148,16 @@ if ($isAdmin) {
   }
 } else {
   Write-Host "  Not elevated -> if the gate later logs a listener error, run in an ADMIN shell:" -ForegroundColor Yellow
-  Write-Host "    netsh http add urlacl url=http://127.0.0.1:17999/ user=`"$env:USERDOMAIN\$env:USERNAME`""
+  Write-Host "    netsh http add urlacl url=http://127.0.0.1:17999/ user=`"$env:USERDOMAIN\$env:USERNAME`"" -ForegroundColor Cyan
+  $manualAdmin += "netsh http add urlacl url=http://127.0.0.1:17999/ user=`"$env:USERDOMAIN\$env:USERNAME`""
 }
 
 # ---- remaining manual steps ----------------------------------------------------------
+if ($manualAdmin.Count) {
+  Write-Host ""
+  Write-Host "=== SKIPPED (needs an ADMIN shell) -- run these yourself: ===" -ForegroundColor Red
+  $manualAdmin | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
+}
 Write-Host ""
 Write-Host "=== Done. Manual steps left (see README): ===" -ForegroundColor Cyan
 Write-Host @"

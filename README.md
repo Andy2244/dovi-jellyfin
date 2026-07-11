@@ -17,17 +17,20 @@ Clone or unzip the repo and run **`setup.cmd`** (double-click works). Tested sta
 
 ![Advanced display showing the Dolby Vision certification line](images/hdr-certification.png)
 
-If that line is missing, the DV decoder will never engage and nothing in this repo can
-help -- **do not buy the paid HEVC Video Extensions yet.** `setup.ps1` checks this first.
+Very few displays/TVs get this line out of the box -- **expect it to be missing** and plan
+for the EDID fix below. Without it the DV decoder will never engage and nothing in this
+repo can help -- **do not buy the paid HEVC Video Extensions yet.** `setup.cmd` checks
+this first.
 
-<details><summary>Certification line missing?</summary>
+### Certification line missing? Fix the EDID first
 
-Most TVs don't advertise DV on the HDMI input a PC uses. The fix is an EDID override --
-one byte in the Dolby VSVDB block, applied with CRU: follow
-[dolby-vision-for-windows](https://github.com/balu100/dolby-vision-for-windows). Its README
-has known per-TV values (e.g. Hisense U8GQ: `480362746a7f7c` -> `480363746a7f7c`) and a
-calculator for the rest. Reboot, re-check the settings page, then continue here.
-</details>
+Most TVs don't advertise DV on the HDMI input a PC uses, so a missing line is the NORMAL
+starting state -- and an EDID override is the ONLY way to get it. Follow
+**[dolby-vision-for-windows](https://github.com/balu100/dolby-vision-for-windows)
+step by step** (CRU + a one-byte edit of the Dolby VSVDB block). Its README has known
+per-TV values (e.g. Hisense U8GQ: `480362746a7f7c` -> `480363746a7f7c`) and a calculator
+for everything else. Reboot, confirm the settings page now shows the line, then come back
+here -- **nothing below works until it does.**
 
 ## What you get
 
@@ -42,12 +45,10 @@ calculator for the rest. Reboot, re-check the settings page, then continue here.
 ## Requirements
 
 - Windows 11 (tested 25H2 / 26200), a DV-capable TV, and the certification line above.
-- Microsoft Edge + ViolentMonkey (MV2 extension -- `setup.ps1` pins the Edge MV2 policy;
+- Microsoft Edge + ViolentMonkey (MV2 extension -- the setup script pins the Edge MV2 policy;
   Tampermonkey MV3 is the fallback if Edge ever drops MV2).
-- **Dolby Vision Extensions** (free) + **HEVC Video Extensions** from the Store.
-  `setup.ps1` tries the delisted free OEM HEVC package first -- fine for testing; buy the
-  [paid one](https://apps.microsoft.com/detail/9nmzlz57r3t7) (~1 USD/EUR) for the final
-  setup, it is the maintained codec.
+- **Dolby Vision Extensions** (free) + **[HEVC Video Extensions](https://apps.microsoft.com/detail/9nmzlz57r3t7)**
+  (paid, ~1 USD/EUR -- the old free OEM package no longer exists in the Store).
 - A Jellyfin server at the origin root (no `/jellyfin` base path).
 - Only for the optional gate: PowerShell 7 + the DisplayConfig module (setup installs both).
 
@@ -83,7 +84,7 @@ calculator for the rest. Reboot, re-check the settings page, then continue here.
 - Known-good reset: `curl -X POST http://127.0.0.1:17999/default` -- also runs
   automatically at every service start.
 - First run: confirm `http://127.0.0.1:17999/health` answers. If the listener can't bind,
-  run the `netsh http add urlacl` line from `setup.ps1` step 5. Must run in the interactive
+  run the `netsh http add urlacl` line from setup step 5. Must run in the interactive
   desktop session (not via SSH/RDP-disconnected).
 - Every real mode switch costs one TV re-sync blank (~2-3 s); same-mode binge = instant.
 - Without the gate DV still works: toggle HDR yourself BEFORE pressing play --
