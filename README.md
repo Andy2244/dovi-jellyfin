@@ -36,8 +36,8 @@ here -- **nothing below works until it does.**
 
 | | |
 |---|---|
-| DV profiles 5 + 8 | Direct-play with the RPU dynamic trims applied (LLDV-style source-side processing; the output is an HDR10 signal carrying the DV-processed picture, no DV VSIF. TV-led DV from Windows exists only on TVs with a DV PC mode, e.g. recent LG, via a dedicated DV player app + 8-bit RGB Full output -- not this setup's path) |
-| Profile 7 (FEL) | Base layer + RPU at best; the FEL enhancement layer never decodes |
+| DV profiles 5 + 8 | Direct-play with the DV dynamic metadata applied. The PC does the DV processing itself (LLDV-style) and outputs HDR10 -- so the TV never shows its DV logo; that is normal for this setup. |
+| Profile 7 (FEL) | Plays as base layer + dynamic metadata; the FEL enhancement layer is ignored |
 | Audio | AAC / AC3 / EAC3 / FLAC / 2ch-Opus direct-play; DTS / TrueHD / >2ch-Opus auto-transcode (video stays copied) |
 | Display switching | Optional gate service flips desktop HDR + matches refresh rate BEFORE the first frame |
 | Bonus (unverified) | Direct-played EAC3 Atmos can reach "Dolby Atmos for Headphones" still encoded = true object-based HRTF (needs Dolby Access) |
@@ -48,8 +48,10 @@ here -- **nothing below works until it does.**
 - Microsoft Edge + ViolentMonkey (MV2 extension -- the setup script pins the Edge MV2 policy;
   Tampermonkey MV3 is the fallback if Edge ever drops MV2).
 - **Dolby Vision Extensions** (free) + **[HEVC Video Extensions](https://apps.microsoft.com/detail/9nmzlz57r3t7)**
-  (paid, ~1 USD/EUR -- the old free OEM package no longer exists in the Store).
-- A Jellyfin server at the origin root (no `/jellyfin` base path).
+  (paid, ~1 USD/EUR).
+- A Jellyfin server reached directly by host/IP + port (`http://htpc:8096/...`) -- the
+  normal LAN setup. A reverse proxy that serves Jellyfin under a subpath
+  (`https://mydomain/jellyfin/...`) breaks the userscript.
 - Only for the optional gate: PowerShell 7 + the DisplayConfig module (setup installs both).
 
 ## Setup
@@ -73,7 +75,8 @@ here -- **nothing below works until it does.**
    manually (taskbar/Start menu) has no DV flags and DV silently won't engage. The setup
    offers a "Jellyfin DV" desktop shortcut for it.
 
-<details><summary>Optional: automatic HDR + refresh switching (gate service)</summary>
+<details>
+<summary><b>Optional: automatic HDR + refresh switching (gate service) -- click to expand</b></summary>
 
 - The launcher auto-starts it (`GATE_ARGS` in the `.cmd` for options); logs to
   `jf-hdr-gate.log` next to the script.
@@ -148,7 +151,7 @@ and the video stays copied either way.
 
 ## Known limits (the dealbreakers)
 
-- No FEL decode in this setup (mpv/libplacebo can now decode P7 FEL with its own L1-based tone mapping -- a separate, non-Jellyfin-web route); no TV-led DV here.
+- No FEL decode; no TV-led DV in this setup.
 - No DTS/TrueHD bitstreaming; those tracks transcode.
 - The launcher kills ALL Edge processes (a dedicated HTPC is assumed).
 - No 4K50/60 HDR on HDMI 2.0 GPUs in this path.
